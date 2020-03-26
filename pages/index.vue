@@ -31,8 +31,8 @@ export default {
     this.filter = "bilateral"
     this.lastTimestamp = 0
 
-    //this.testVideo()
-    this.testImage()
+    this.testVideo()
+    //this.testImage()
   },
 
   methods: {
@@ -85,7 +85,7 @@ export default {
     },
 
     onSlider(e) {
-      const min = 0.02, max = 0.16
+      const min = 0.01, max = 0.1
       const sigma = min + (e.target.value / 10.0)*(max-min)
       this.filterOptions = {sigma}
     }
