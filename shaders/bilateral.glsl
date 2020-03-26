@@ -6,12 +6,12 @@ precision mediump float;
 
 // our texture
 uniform sampler2D u_image;
-uniform vec2 u_texSize;
+uniform vec2 u_resolution;
 uniform float u_kernel[MSIZE];
 uniform float u_sigma;
 
-// the texCoords passed in from the vertex shader.
-varying vec2 v_texCoord;
+// the v_position passed in from the vertex shader.
+varying vec2 v_position;
 
 
 float normpdf(in float x, in float sigma)
@@ -25,9 +25,9 @@ float normpdf3(in vec3 v, in float sigma)
 }
 
 void main() {
-  vec2 pixel = vec2(1.0, 1.0) / u_texSize;
+  vec2 pixel = vec2(1.0, 1.0) / u_resolution;
 
-  vec3 c = texture(u_image, v_texCoord).rgb;
+  vec3 c = texture(u_image, v_position).rgb;
 
   //declare stuff
   const int kSize = (MSIZE-1)/2;
@@ -39,7 +39,7 @@ void main() {
   {
     for (int j=-kSize; j <= kSize; ++j)
     {
-      vec3 cc = texture(u_image, v_texCoord + pixel*vec2(float(i),float(j))).rgb;
+      vec3 cc = texture(u_image, v_position + pixel*vec2(float(i),float(j))).rgb;
       float factor = normpdf3(cc-c, u_sigma)*bZ*u_kernel[kSize+j]*u_kernel[kSize+i];
       Z += factor;
       final_color += factor*cc;

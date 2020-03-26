@@ -2,7 +2,8 @@
   <div class="container">
     <div>
       <p>
-      <label>原图：<input @change="onCheck" type="checkbox" value="identical" /></label>
+      <label>原图：<input ref="showOriginal" 
+        @change="onCheck" type="checkbox" value="identical" /></label>
       </p>
       <p>
       <label>磨皮：<input @change="onSlider" type="range" step="1" min="1" max="10" value="5" /></label>
@@ -22,30 +23,40 @@
 
 <script>
 import WebFilter from '~/core/WebFilter.js'
-import TestPng from '~/assets/test.png'
+import Test from '~/assets/test.png'
+import Test2 from '~/assets/test2.jpeg'
 
 export default {
+  data() {
+    return {
+      showOriginal: false,
+      options: {
+        level: 0.5
+      }
+    }
+  },
+
   mounted() {
     this.canvas = this.$refs.canvas
 
-    this.filter = "bilateral"
     this.lastTimestamp = 0
+    this.onLoopBind = this.onLoop.bind(this)
 
     this.testVideo()
-    //this.testImage()
+    //this.testImage(Test2)
   },
 
   methods: {
-    testImage() {
+    testImage(img) {
       this.video = new Image
       this.video.onload = ()=> {
-        this.canvas.width = 480
-        this.canvas.height = 480 / this.video.width * this.video.height
+        this.canvas.width = 640
+        this.canvas.height = this.canvas.width / this.video.width * this.video.height
 
         this.wf = new WebFilter(this.canvas)
-        requestAnimationFrame(this.onLoop.bind(this))
+        requestAnimationFrame(this.onLoopBind)
       }
-      this.video.src = TestPng
+      this.video.src = img
     },
 
     testVideo() {
@@ -59,7 +70,7 @@ export default {
           this.canvas.height = 480 / this.video.videoWidth * this.video.videoHeight
 
           this.wf = new WebFilter(this.canvas)
-          requestAnimationFrame(this.onLoop.bind(this))
+          requestAnimationFrame(this.onLoopBind)
         }
         this.video.srcObject = stream
       })
@@ -67,27 +78,25 @@ export default {
     },
 
     onLoop(timestamp) {
-      requestAnimationFrame(this.onLoop.bind(this))
+      requestAnimationFrame(this.onLoopBind)
       if(timestamp - this.lastTimestamp < 1000/15) {
         return
       }
       this.lastTimestamp = timestamp
 
-      this.wf.render(this.video, this.filter, this.filterOptions)
-    },
-
-    onCheck(e) {
-      if(e.target.checked) {
-        this.filter = 'identical'
+      if(this.showOriginal) {
+        this.wf.copy(this.video)
       } else {
-        this.filter = 'bilateral'
+        this.wf.beautify(this.video, this.options)
       }
     },
 
+    onCheck(e) {
+      this.showOriginal = e.target.checked
+    },
+
     onSlider(e) {
-      const min = 0.01, max = 0.1
-      const sigma = min + (e.target.value / 10.0)*(max-min)
-      this.filterOptions = {sigma}
+      this.options = {level: e.target.value/10.}
     }
   }
 }

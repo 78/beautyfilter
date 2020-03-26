@@ -8,7 +8,7 @@ uniform vec2 u_resolution;
 varying vec2 v_position;
 
 void main() {
-  vec4 p = texture2D(u_image, v_position);
-  float v = (p.x+p.y+p.z)/3.0;
-  gl_FragColor = vec4(v,v,v,1.0);
+  vec4 image = texture2D(u_image, v_position);
+  float ba = 2.0 * image.g * image.b;
+  gl_FragColor = vec4(ba,ba,ba,image.a);
 }
